@@ -11,4 +11,4 @@ network_topology:
 	./network_topology.sh url_list.txt
 
 clean:
-	rm -f dnslookup traceroute_ipv4.txt ipv* router* 
+	rm -f dnslookup traceroute_ipv* ipv* router* 

@@ -4,10 +4,5 @@ www.geeksforgeeks.org
 www.australia.gov.au
 www.gla.ac.uk
 www.amazon.co.uk
-www.martinfowler.com
-www.edx.org
-www.facebook.com
-www.bbcgoodfood.com
-www.mit.edu
-www.towardsdatascience.com
+www.google.com
 

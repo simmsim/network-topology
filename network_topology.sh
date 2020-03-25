@@ -10,7 +10,7 @@ function run_traceroute() {
             if [[ $addr_ipv4 =~ [0-9] && $addr_ipv4 == *[\.]* ]]; then
                 res+="${addr_ipv4} "
             fi
-        done <<<$(traceroute -4 -q 1 -n "$line")
+        done <<<$(traceroute -$3 -q 1 -n "$line")
         echo ${res} >> "$1"
         echo -e >> "$1"
         res=""
@@ -36,7 +36,7 @@ function produce_topology() {
     sed -i '1i graph routertopology {' "$1"
     echo "}" >> "$1"
 
-    dot -T pdf -o router-topology-v4.dot.pdf "$1"
+    dot -T pdf -o "$2" "$1"
 }
 
 hostnames=$1
@@ -46,17 +46,11 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-traceroute_ipv4='traceroute_ipv4.txt'
-traceroute_ipv6='traceroute_ipv6.txt'
-
-processed_ipv4='router-topology-v4.dot'
-processed_ipv6='router-topology-v6.dot'
-
 traceroute_files=('traceroute_ipv4.txt' 'traceroute_ipv6.txt')
 processed_files=('router-topology-v4.dot' 'router-topology-v6.dot')
 address_files=('ipv4.txt' 'ipv6.txt')
+graph_files=('router-topology-v4.dot.pdf' 'router-topology-v6.dot.pdf')
 
-#files=($traceroute_ipv4 $traceroute_ipv6 $processed_ipv4 $processed_ipv6 "${address_files[@]}")
 files=("${traceroute_files[@]}" "${processed_files[@]}" "${address_files[@]}")
 
 #Remove files from previous run
@@ -82,18 +76,24 @@ do
 done < "$hostnames"
 
 # For IPv4
-run_traceroute $traceroute_ipv4 ${address_files[0]}
+run_traceroute ${traceroute_files[0]} ${address_files[0]} 4
 
 # Process IPv4 traceroute file
-process_traceroute $processed_ipv4 $traceroute_ipv4
+process_traceroute ${processed_files[0]} ${traceroute_files[0]}
 
 # Produce topology for IPv4 traceroute
-produce_topology $processed_ipv4
+produce_topology ${processed_files[0]} ${graph_files[0]}
 
-# for i in "${!address_files[@]}"; do
-#     run_traceroute ${traceroute_files[$i]} ${address_files[$i]}
-#     process_traceroute "${processed_files[$i]}" "${traceroute_files[$i]}"
-#     produce_topology "${processed_files[$i]}"
-# done
+# For Ipv6 (check first, not all ISPs provide IPv6 connection)
+ping6 ipv6.google.com 2> /dev/null
+
+if [[ $? -eq 0 ]]; then
+    run_traceroute ${traceroute_files[1]} $traceroute_ipv6 ${address_files[1]} 6
+    process_traceroute ${processed_files[1]} ${traceroute_files[1]}
+    produce_topology ${processed_files[1]} ${graph_files[1]}
+else
+    echo "IPv6 traceroute could not be performed. Check for IPv6 connection support."
+fi
+
 
 
