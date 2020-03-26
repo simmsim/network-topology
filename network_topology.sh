@@ -6,9 +6,9 @@ function run_traceroute() {
     do
         while IFS= read -r out
         do  
-            addr_ipv4="$(echo "$out" | awk '{print $2;}')"
-            if [[ $addr_ipv4 =~ [0-9] && $addr_ipv4 == *[\.]* ]]; then
-                res+="${addr_ipv4} "
+            addr="$(echo "$out" | awk '{print $2;}')"
+            if [[ $addr =~ [0-9] && $addr == *[\.]* || $addr == *[:]* ]]; then
+                res+="${addr} "
             fi
         done <<<$(traceroute -$3 -q 1 -n "$line")
         echo ${res} >> "$1"
